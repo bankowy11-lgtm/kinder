@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#FF6B6B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="KinderKsiążka">
+<meta name="description" content="Magiczna biblioteczka dla dzieci!">
+<title>📚 KinderKsiążka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ===== CSS VARIABLES ===== */
+:root {
+  --bg: #FFF8F0;
+  --bg2: #FFE8CC;
+  --shelf: #C8845A;
+  --shelf-dark: #A0622A;
+  --text: #2D1B0E;
+  --text2: #6B4423;
+  --accent: #FF6B6B;
+  --accent2: #FFD93D;
+  --accent3: #6BCB77;
+  --accent4: #4D96FF;
+  --page-bg: #FFFEF5;
+  --page-shadow: rgba(0,0,0,0.15);
+  --card: #FFFFFF;
+  --star: #FFD93D;
+  --radius: 20px;
+  --transition: 0.3s ease;
+}
+
+.dark {
+  --bg: #1A0F05;
+  --bg2: #2D1A08;
+  --shelf: #6B3A1F;
+  --shelf-dark: #4A2510;
+  --text: #F5E6D3;
+  --text2: #C4956A;
+  --page-bg: #2A1A0A;
+  --page-shadow: rgba(0,0,0,0.5);
+  --card: #2D1A08;
+}
+
+/* ===== RESET ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; font-family: 'Nunito', sans-serif; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  transition: background var(--transition), color var(--transition);
+  overflow-x: hidden;
+}
+
+/* ===== SCREENS ===== */
+.screen {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  transform: scale(0.97);
+  overflow: hidden;
+}
+.screen.active {
+  opacity: 1; pointer-events: all;
+  transform: scale(1);
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: var(--accent);
+  padding: 14px 20px 12px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 4px 20px rgba(255,107,107,0.3);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+.header-logo {
+  font-family: 'Fredoka One', cursive;
+  font-size: 26px; color: white;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+}
+.header-sub {
+  font-size: 11px; color: rgba(255,255,255,0.8);
+  font-weight: 600;
+}
+.header-actions {
+  margin-left: auto;
+  display: flex; gap: 8px;
+}
+.icon-btn {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  border: none; cursor: pointer;
+  background: rgba(255,255,255,0.25);
+  color: white; font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.2s, background 0.2s;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.4); transform: scale(1.1); }
+.icon-btn:active { transform: scale(0.9); }
+
+/* ===== BOOKSHELF ===== */
+#shelf-screen {
+  background: var(--bg);
+}
+
+.shelf-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px 40px;
+}
+.shelf-scroll::-webkit-scrollbar { display: none; }
+
+.shelf-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px; color: var(--text);
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.shelf-unit {
+  background: linear-gradient(180deg, var(--shelf) 0%, var(--shelf-dark) 100%);
+  border-radius: 12px;
+  padding: 16px 16px 0;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15), inset 0 2px 0 rgba(255,255,255,0.2);
+  position: relative;
+}
+.shelf-unit::after {
+  content: '';
+  display: block;
+  height: 12px;
+  background: linear-gradient(180deg, var(--shelf-dark) 0%, #6B3A1F 100%);
+  margin: 0 -16px;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.shelf-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  padding-bottom: 10px;
+  min-height: 160px;
+}
+
+/* ===== BOOK CARD ===== */
+.book-card {
+  flex: 0 0 auto;
+  width: 90px;
+  cursor: pointer;
+  position: relative;
+  animation: bookSlideIn 0.4s ease backwards;
+}
+@keyframes bookSlideIn {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.book-card:hover .book-cover { transform: translateY(-8px) rotate(-2deg); }
+.book-card:active .book-cover { transform: translateY(-4px) scale(0.97); }
+
+.book-cover {
+  width: 90px;
+  border-radius: 4px 10px 10px 4px;
+  box-shadow: -4px 4px 12px rgba(0,0,0,0.3), inset -3px 0 8px rgba(0,0,0,0.15);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 2/3;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 10px 6px;
+  text-align: center;
+}
+.book-cover::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 10px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 4px 0 0 4px;
+}
+.book-cover::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+}
+.book-emoji { font-size: 28px; margin-bottom: 4px; }
+.book-title-small {
+  font-size: 10px; font-weight: 800; color: white;
+  line-height: 1.2;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  position: relative; z-index: 1;
+}
+
+.book-stars {
+  text-align: center;
+  font-size: 12px;
+  margin-top: 4px;
+  height: 14px;
+}
+
+.progress-bar-mini {
+  height: 4px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 2px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+.progress-fill-mini {
+  height: 100%;
+  background: white;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+/* ===== READER SCREEN ===== */
+#reader-screen {
+  background: #8B6E52;
+  background-image: 
+    radial-gradient(ellipse at 20% 50%, rgba(139,110,82,0.5) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(80,50,30,0.4) 0%, transparent 50%);
+}
+
+.reader-header {
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(10px);
+  padding: 10px 16px;
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0;
+}
+.reader-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px; color: white;
+  flex: 1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.reader-header .icon-btn {
+  background: rgba(255,255,255,0.2);
+  flex-shrink: 0;
+}
+
+/* ===== PAGE BOOK ===== */
+.book-reader {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  perspective: 2000px;
+  padding: 12px 12px 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.page-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+}
+
+/* BOOK SHADOW */
+.book-reader-shadow { display: none; }
+
+/* PAGE */
+.page {
+  position: absolute; inset: 0;
+  background: var(--page-bg);
+  border-radius: 4px 16px 16px 4px;
+  box-shadow: 
+    -4px 0 12px rgba(0,0,0,0.1),
+    4px 4px 20px rgba(0,0,0,0.2),
+    inset -1px 0 3px rgba(0,0,0,0.05);
+  padding: 28px 28px 20px;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  backface-visibility: hidden;
+  transform-origin: left center;
+  transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+}
+
+/* Page texture */
+.page::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    transparent,
+    transparent 27px,
+    rgba(100,80,60,0.06) 27px,
+    rgba(100,80,60,0.06) 28px
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
+/* Page left edge */
+.page::after {
+  content: '';
+  position: absolute; left: 0; top: 10%; bottom: 10%;
+  width: 6px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.1), transparent);
+  border-radius: 0;
+}
+
+.dark .page {
+  background: var(--page-bg);
+}
+
+/* FLIP ANIMATION */
+.page.flipping-out {
+  animation: flipOut 0.5s cubic-bezier(0.645, 0.045, 0.355, 1.000) forwards;
+  z-index: 5;
+}
+.page.flipping-in {
+  animation: flipIn 0.5s cubic-bezier(0.645, 0.045, 0.355, 1.000) forwards;
+  z-index: 4;
+}
+@keyframes flipOut {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(-160deg); }
+}
+@keyframes flipIn {
+  0% { transform: rotateY(20deg); opacity: 0.8; }
+  100% { transform: rotateY(0deg); opacity: 1; }
+}
+
+.page.prev-flip-out {
+  animation: prevFlipOut 0.5s cubic-bezier(0.645, 0.045, 0.355, 1.000) forwards;
+  z-index: 5;
+}
+.page.prev-flip-in {
+  animation: prevFlipIn 0.5s cubic-bezier(0.645, 0.045, 0.355, 1.000) forwards;
+  z-index: 4;
+}
+@keyframes prevFlipOut {
+  0% { transform: rotateY(-160deg); }
+  100% { transform: rotateY(0deg); }
+}
+@keyframes prevFlipIn {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(20deg); opacity: 0; }
+}
+
+/* PAGE CONTENT */
+.page-chapter {
+  font-family: 'Fredoka One', cursive;
+  font-size: 11px; letter-spacing: 2px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.page-illustration {
+  font-size: 64px;
+  text-align: center;
+  margin: 8px 0;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+  line-height: 1;
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.page-text {
+  font-size: 19px;
+  line-height: 1.8;
+  color: var(--text);
+  font-weight: 600;
+  flex: 1;
+  overflow-y: auto;
+}
+.page-text::-webkit-scrollbar { display: none; }
+
+.page-num {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 10px;
+  font-weight: 700;
+}
+
+/* ===== READER CONTROLS ===== */
+.reader-controls {
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(10px);
+  padding: 12px 20px;
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+}
+
+.nav-btn {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: none; cursor: pointer;
+  font-size: 22px;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+}
+.nav-btn:active { transform: scale(0.9); }
+.nav-btn.prev { background: rgba(255,255,255,0.2); color: white; }
+.nav-btn.next { background: var(--accent); color: white; box-shadow: 0 4px 16px rgba(255,107,107,0.5); }
+.nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+.progress-wrap {
+  flex: 1;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.progress-text {
+  font-size: 12px; color: rgba(255,255,255,0.8);
+  font-weight: 700; text-align: center;
+}
+.progress-bar {
+  height: 8px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.tts-btn {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.4);
+  background: transparent;
+  color: white; font-size: 22px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.tts-btn.speaking {
+  background: var(--accent3);
+  border-color: var(--accent3);
+  animation: pulse 1s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(107,203,119,0.5); }
+  50% { box-shadow: 0 0 0 10px rgba(107,203,119,0); }
+}
+
+/* ===== COMPLETION OVERLAY ===== */
+.completion-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s;
+}
+.completion-overlay.show {
+  opacity: 1; pointer-events: all;
+}
+.completion-card {
+  background: white;
+  border-radius: 24px;
+  padding: 40px 32px;
+  text-align: center;
+  max-width: 320px;
+  width: 90%;
+  animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dark .completion-card { background: #2D1A08; }
+@keyframes popIn {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.completion-emoji { font-size: 80px; animation: bounce 0.6s ease 0.3s both; }
+@keyframes bounce {
+  from { transform: scale(0) rotate(-10deg); }
+  70% { transform: scale(1.2) rotate(5deg); }
+  to { transform: scale(1) rotate(0); }
+}
+.completion-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 28px; color: var(--accent);
+  margin: 12px 0 8px;
+}
+.completion-text {
+  font-size: 16px; color: var(--text2);
+  font-weight: 600; margin-bottom: 20px;
+}
+.stars-display { font-size: 36px; margin-bottom: 20px; }
+.completion-btn {
+  background: var(--accent);
+  color: white;
+  border: none; cursor: pointer;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px;
+  box-shadow: 0 4px 16px rgba(255,107,107,0.4);
+  transition: transform 0.2s;
+}
+.completion-btn:hover { transform: scale(1.05); }
+
+/* ===== STARS RAIN ===== */
+.stars-rain {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 99;
+  overflow: hidden;
+}
+.star-particle {
+  position: absolute;
+  font-size: 24px;
+  animation: starFall linear forwards;
+}
+@keyframes starFall {
+  from { transform: translateY(-40px) rotate(0deg); opacity: 1; }
+  to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* ===== SETTINGS TOAST ===== */
+.toast {
+  position: fixed;
+  bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(0,0,0,0.85);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 15px; font-weight: 700;
+  z-index: 200;
+  opacity: 0; transition: all 0.3s;
+  white-space: nowrap;
+}
+.toast.show {
+  opacity: 1; transform: translateX(-50%) translateY(0);
+}
+
+/* ===== SWIPE HINT ===== */
+.swipe-hint {
+  position: absolute;
+  bottom: 50%;
+  width: 100%;
+  display: flex; justify-content: space-between;
+  padding: 0 8px;
+  pointer-events: none;
+  opacity: 0.4;
+}
+.swipe-arrow { font-size: 28px; color: white; }
+
+/* ===== FONT SIZE CONTROL ===== */
+.font-control {
+  display: flex; align-items: center; gap: 6px;
+}
+.font-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.4);
+  background: transparent;
+  color: white;
+  font-size: 16px; font-weight: 800;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.font-btn:hover { background: rgba(255,255,255,0.2); }
+
+/* ===== INSTALL BANNER ===== */
+.install-banner {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(135deg, var(--accent4), #2563EB);
+  color: white;
+  padding: 16px 20px;
+  display: flex; align-items: center; gap: 12px;
+  z-index: 300;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+  transform: translateY(100%);
+  transition: transform 0.4s ease;
+}
+.install-banner.show { transform: translateY(0); }
+.install-banner-text { flex: 1; }
+.install-banner-title { font-family: 'Fredoka One', cursive; font-size: 16px; }
+.install-banner-sub { font-size: 12px; opacity: 0.85; }
+.install-btn {
+  background: white;
+  color: var(--accent4);
+  border: none; cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.install-close {
+  background: none; border: none; color: white;
+  font-size: 20px; cursor: pointer; padding: 4px;
+}
+
+/* ===== LOADING ===== */
+.loading {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 100vh;
+  background: var(--bg);
+}
+.loading-emoji { font-size: 80px; animation: float 1.5s ease-in-out infinite; }
+.loading-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 32px; color: var(--accent);
+  margin: 16px 0 8px;
+}
+.loading-bar {
+  width: 200px; height: 8px;
+  background: var(--bg2);
+  border-radius: 4px; overflow: hidden;
+  margin-top: 20px;
+}
+.loading-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  border-radius: 4px;
+  animation: loading 1.5s ease forwards;
+}
+@keyframes loading {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+/* ===== CATEGORY TABS ===== */
+.category-tabs {
+  display: flex; gap: 8px;
+  padding: 0 16px 16px;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+.category-tabs::-webkit-scrollbar { display: none; }
+.cat-tab {
+  flex: 0 0 auto;
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: 2px solid transparent;
+  background: var(--bg2);
+  color: var(--text2);
+  font-family: 'Fredoka One', cursive;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cat-tab.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(255,107,107,0.3);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (min-width: 600px) {
+  .book-reader { padding: 16px 20px 6px; }
+  .page { padding: 36px 40px 24px; }
+  .page-text { font-size: 20px; line-height: 1.85; }
+  .epub-page-content { font-size: 20px; line-height: 1.9; }
+  .page-illustration { font-size: 80px; }
+}
+@media (min-width: 900px) {
+  .page { padding: 44px 52px 28px; }
+  .page-text { font-size: 22px; }
+  .epub-page-content { font-size: 22px; }
+  .page-chapter { font-size: 13px; }
+}
+
+/* ===== EPUB MODAL ===== */
+.epub-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex; align-items: flex-end; justify-content: center;
+  z-index: 400;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.epub-modal-overlay.show { opacity: 1; pointer-events: all; }
+.epub-modal {
+  background: var(--card);
+  border-radius: 28px 28px 0 0;
+  padding: 24px 20px 40px;
+  width: 100%; max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.epub-modal-overlay.show .epub-modal { transform: translateY(0); }
+.epub-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.epub-modal-title { font-family: 'Fredoka One', cursive; font-size: 22px; color: var(--text); }
+.epub-close-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: var(--bg2); color: var(--text2); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.epub-drop-zone { border: 3px dashed var(--accent); border-radius: 20px; padding: 32px 20px; text-align: center; cursor: pointer; transition: background 0.2s, transform 0.2s; margin-bottom: 16px; background: rgba(255,107,107,0.05); }
+.epub-drop-zone:hover, .epub-drop-zone.drag-over { background: rgba(255,107,107,0.12); transform: scale(1.01); }
+.epub-drop-icon { font-size: 48px; margin-bottom: 10px; }
+.epub-drop-text { font-family: 'Fredoka One', cursive; font-size: 18px; color: var(--text); }
+.epub-drop-sub { font-size: 13px; color: var(--text2); margin-top: 4px; font-weight: 600; }
+.epub-progress-wrap { margin-bottom: 16px; }
+.epub-progress-bar { height: 10px; background: var(--bg2); border-radius: 5px; overflow: hidden; margin-bottom: 8px; }
+.epub-progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius: 5px; transition: width 0.3s ease; width: 0%; }
+.epub-progress-text { text-align: center; font-size: 13px; color: var(--text2); font-weight: 700; }
+.epub-book-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+.epub-book-item { background: var(--bg2); border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; }
+.epub-book-cover-mini { width: 50px; height: 68px; border-radius: 4px 8px 8px 4px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; box-shadow: -3px 3px 8px rgba(0,0,0,0.2); }
+.epub-book-info { flex: 1; min-width: 0; }
+.epub-book-name { font-family: 'Fredoka One', cursive; font-size: 15px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.epub-book-meta { font-size: 12px; color: var(--text2); font-weight: 600; margin-top: 2px; }
+.epub-book-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.epub-read-btn { background: var(--accent); color: white; border: none; border-radius: 50px; padding: 8px 16px; cursor: pointer; font-family: 'Fredoka One', cursive; font-size: 14px; transition: transform 0.2s; }
+.epub-read-btn:hover { transform: scale(1.05); }
+.epub-delete-btn { width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(255,107,107,0.15); color: var(--accent); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.epub-delete-btn:hover { background: rgba(255,107,107,0.3); }
+.epub-info { text-align: center; font-size: 12px; color: var(--text2); font-weight: 600; padding: 8px 0; }
+.epub-page-content { font-size: 19px; line-height: 1.85; color: var(--text); font-weight: 500; flex: 1; overflow-y: auto; }
+.epub-page-content::-webkit-scrollbar { display: none; }
+.epub-page-content h1, .epub-page-content h2, .epub-page-content h3 { font-family: 'Fredoka One', cursive; color: var(--accent); margin: 12px 0 8px; }
+.epub-page-content p { margin-bottom: 10px; }
+.epub-page-content img { max-width: 100%; border-radius: 8px; }
+
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading" id="loading">
+  <div class="loading-emoji">📚</div>
+  <div class="loading-title">KinderKsiążka</div>
+  <div style="color:var(--text2);font-size:14px;font-weight:700;">Magiczna biblioteczka dla dzieci!</div>
+  <div class="loading-bar"><div class="loading-fill"></div></div>
+</div>
+
+<!-- ===== SHELF SCREEN ===== -->
+<div class="screen" id="shelf-screen">
+  <div class="header">
+    <div>
+      <div class="header-logo">📚 KinderKsiążka</div>
+      <div class="header-sub">Twoja magiczna biblioteczka</div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="openEpubUpload()" title="Dodaj książkę EPUB" id="addEpubBtn">➕</button>
+      <button class="icon-btn" onclick="toggleDark()" title="Tryb nocny" id="darkBtn">🌙</button>
+    </div>
+  </div>
+
+  <div class="category-tabs" id="categoryTabs">
+    <button class="cat-tab active" onclick="filterBooks('all', this)">🌟 Wszystkie</button>
+    <button class="cat-tab" onclick="filterBooks('bajki', this)">🧚 Bajki</button>
+    <button class="cat-tab" onclick="filterBooks('przygody', this)">🗺️ Przygody</button>
+    <button class="cat-tab" onclick="filterBooks('zwierzeta', this)">🦁 Zwierzęta</button>
+    <button class="cat-tab" onclick="filterBooks('kosmos', this)">🚀 Kosmos</button>
+    <button class="cat-tab" onclick="filterBooks('moje', this)">📖 Moje</button>
+  </div>
+
+  <div class="shelf-scroll" id="shelfScroll">
+    <!-- Shelves generated by JS -->
+  </div>
+</div>
+
+<!-- ===== READER SCREEN ===== -->
+<div class="screen" id="reader-screen">
+  <div class="reader-header">
+    <button class="icon-btn" onclick="goToShelf()">←</button>
+    <div class="reader-title" id="readerTitle">Tytuł książki</div>
+    <div class="font-control">
+      <button class="font-btn" onclick="changeFontSize(-1)">A-</button>
+      <button class="font-btn" onclick="changeFontSize(1)">A+</button>
+    </div>
+    <button class="icon-btn" onclick="toggleDark()" id="darkBtn2">🌙</button>
+  </div>
+
+  <div class="book-reader">
+    <div class="page-container" id="pageContainer">
+      <div class="page" id="currentPage">
+        <div class="page-chapter" id="pageChapter"></div>
+        <div class="page-illustration" id="pageIllustration"></div>
+        <div class="page-text" id="pageText"></div>
+        <div class="page-num" id="pageNum"></div>
+      </div>
+    </div>
+    <div class="book-reader-shadow"></div>
+    <div class="swipe-hint">
+      <div class="swipe-arrow" id="leftHint">◀</div>
+      <div class="swipe-arrow" id="rightHint">▶</div>
+    </div>
+  </div>
+
+  <div class="reader-controls">
+    <button class="nav-btn prev" id="prevBtn" onclick="prevPage()">◀</button>
+    <div class="progress-wrap">
+      <div class="progress-text" id="progressText">Strona 1 z 1</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+    <button class="tts-btn" id="ttsBtn" onclick="toggleTTS()">🔊</button>
+    <button class="nav-btn next" id="nextBtn" onclick="nextPage()">▶</button>
+  </div>
+</div>
+
+<!-- COMPLETION OVERLAY -->
+<div class="completion-overlay" id="completionOverlay">
+  <div class="stars-rain" id="starsRain"></div>
+  <div class="completion-card">
+    <div class="completion-emoji" id="completionEmoji">🎉</div>
+    <div class="completion-title">Brawo!</div>
+    <div class="completion-text" id="completionText">Przeczytałeś całą książkę!</div>
+    <div class="stars-display" id="completionStars">⭐⭐⭐</div>
+    <button class="completion-btn" onclick="closeCompletion()">🏠 Wróć do półki</button>
+  </div>
+</div>
+
+<!-- EPUB UPLOAD MODAL -->
+<div class="epub-modal-overlay" id="epubModal">
+  <div class="epub-modal">
+    <div class="epub-modal-header">
+      <div class="epub-modal-title">📖 Dodaj swoją książkę</div>
+      <button class="epub-close-btn" onclick="closeEpubUpload()">✕</button>
+    </div>
+    <div class="epub-drop-zone" id="epubDropZone" onclick="document.getElementById('epubFileInput').click()">
+      <div class="epub-drop-icon">📚</div>
+      <div class="epub-drop-text">Kliknij lub przeciągnij plik EPUB</div>
+      <div class="epub-drop-sub">Obsługiwane: .epub</div>
+    </div>
+    <input type="file" id="epubFileInput" accept=".epub" style="display:none" onchange="handleEpubFile(this.files[0])">
+    <div class="epub-progress-wrap" id="epubProgress" style="display:none">
+      <div class="epub-progress-bar"><div class="epub-progress-fill" id="epubProgressFill"></div></div>
+      <div class="epub-progress-text" id="epubProgressText">Wczytywanie...</div>
+    </div>
+    <div id="epubBookList" class="epub-book-list"></div>
+    <div class="epub-info">
+      <span>💡 Książki są zapisywane lokalnie na urządzeniu</span>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner" id="installBanner">
+  <div style="font-size:32px">📱</div>
+  <div class="install-banner-text">
+    <div class="install-banner-title">Zainstaluj aplikację!</div>
+    <div class="install-banner-sub">Czytaj bez internetu, jak prawdziwa aplikacja</div>
+  </div>
+  <button class="install-btn" onclick="installApp()">Zainstaluj</button>
+  <button class="install-close" onclick="hideBanner()">✕</button>
+</div>
+
+<script>
+// ===========================
+// BOOKS DATA
+// ===========================
+const BOOKS = [
+  {
+    id: 1,
+    title: "Mały Smok Piotr",
+    emoji: "🐉",
+    color: "#FF6B6B",
+    color2: "#CC4444",
+    category: "bajki",
+    pages: [
+      { chapter: "Rozdział 1", illustration: "🐉", text: "W dalekiej górze, za siedmioma lasami, mieszkał mały smok o imieniu Piotr. Miał zielone łuski, małe skrzydełka i bardzo miły uśmiech. Wszyscy w okolicy go lubili!" },
+      { chapter: "Rozdział 1", illustration: "🏔️🌲", text: "Piotr mieszkał w wygodnej jaskini. Każdego ranka budził się i ział małymi, różowymi płomykami, które wyglądały jak bańki mydlane. 'Dzień dobry, świecie!' – woływał wesoło." },
+      { chapter: "Rozdział 2", illustration: "🏘️", text: "Pewnego dnia Piotr postanowił odwiedzić wioskę w dolinie. Zrobił się bardzo zdenerwowany, bo nigdy tam nie był. 'A co jeśli się boją smoków?' – myślał smutno." },
+      { chapter: "Rozdział 2", illustration: "👧🧒", text: "Ale kiedy przyleciał do wioski, dzieci podbiegły do niego z radością! 'Smok, smok przyjechał!' – krzyczały wesoło. Mała dziewczynka podała mu wieniec z kwiatów." },
+      { chapter: "Rozdział 3", illustration: "🌈🎉", text: "Piotr spędził z dziećmi cały dzień. Uczył je latać na plecach, a one uczyły go grać w berka. Wieczorem, kiedy leciał do domu, wiedział, że znalazł najlepszych przyjaciół na świecie!" },
+      { chapter: "Koniec", illustration: "⭐", text: "I żyli długo i szczęśliwie! Piotr przylatywał do wioski każdego weekendu. A dzieci zawsze czekały na niego z ciastkami i opowieściami. Koniec! 🐉❤️" }
+    ]
+  },
+  {
+    id: 2,
+    title: "Księżniczka i Gwiazdy",
+    emoji: "👸",
+    color: "#A855F7",
+    color2: "#7C3AED",
+    category: "bajki",
+    pages: [
+      { chapter: "Prolog", illustration: "🌟👸", text: "Dawno dawno temu, w zamku zbudowanym z chmur, mieszkała księżniczka Zosia. Miała włosy koloru złota i oczy niebieskie jak niebo o świcie." },
+      { chapter: "Rozdział 1", illustration: "⭐💫", text: "Każdej nocy Zosia wychodziła na balkon i rozmawiała z gwiazdami. 'Hej, gwiazdo!' – mówiła do najbliższej iskierki. 'Jak Ci dziś minął dzień?'" },
+      { chapter: "Rozdział 1", illustration: "🌟", text: "Pewnej nocy jedna gwiazda odpowiedziała! 'Hej, Zosiu! Jestem Blinka, strażniczka nocnego nieba. Czy chciałabyś zobaczyć cosmos z bliska?'" },
+      { chapter: "Rozdział 2", illustration: "🚀✨", text: "Blinka zrobiła się wielka i jasna jak trampolina! Zosia wskoczyła i... fwooooom! Leciała przez gwiazdy, komety i mgławice. 'To jest niesamowite!' – krzyczała ze śmiechem." },
+      { chapter: "Rozdział 3", illustration: "🌙❤️", text: "Nad ranem Blinka zaniosła Zosię z powrotem do zamku. 'Możesz tu wracać każdej nocy' – szepnęła. I od tej pory księżniczka Zosia była najszczęśliwszą dziewczynką w całym królestwie!" }
+    ]
+  },
+  {
+    id: 3,
+    title: "Żabka Zuzia",
+    emoji: "🐸",
+    color: "#22C55E",
+    color2: "#16A34A",
+    category: "zwierzeta",
+    pages: [
+      { chapter: "Wstęp", illustration: "🐸🌿", text: "Nad małym stawem, w samym środku łąki, mieszkała żabka o imieniu Zuzia. Była zielona, wesoła i skakała wyżej niż wszystkie inne żabki!" },
+      { chapter: "Przygoda 1", illustration: "🌧️", text: "Pewnego ranka zaczął padać deszcz. Większość żabek chowała się pod liśćmi. Ale nie Zuzia! Ona wyciągnęła mały parasolek z żołędzia i skoczyła w kałużę. Plusk!" },
+      { chapter: "Przygoda 2", illustration: "🐞🦋", text: "Podczas deszczu Zuzia poznała biedronkę Bietę, która zgubiła parasol. 'Możesz się schować pod moim!' – zaproponowała żabka. Tak zaczęła się ich przyjaźń." },
+      { chapter: "Przygoda 3", illustration: "🌈🌸", text: "Kiedy deszcz przestał padać, na niebie pojawił się wielki tęczowy most. Zuzia i Bieta wskoczyły na niego i zjechały jak z górki prosto na łąkę pełną kwiatów!" },
+      { chapter: "Koniec", illustration: "🐸🐞⭐", text: "Zuzia nauczyła się, że deszcz nie jest smutny – to tylko inny rodzaj zabawy! A Bieta odwiedzała staw co tydzień. 'Przyjaźń to najpiękniejsza przygoda' – mówiła żabka. Koniec! 🐸💚" }
+    ]
+  },
+  {
+    id: 4,
+    title: "Miś na Biegunie",
+    emoji: "🐻‍❄️",
+    color: "#38BDF8",
+    color2: "#0284C7",
+    category: "przygody",
+    pages: [
+      { chapter: "Rozdział 1", illustration: "🐻‍❄️❄️", text: "Biały miś Franek mieszkał na Biegunie Północnym. Każdego dnia ślizgał się po lodzie i łowił ryby. Ale marzył o czymś więcej – chciał zobaczyć świat!" },
+      { chapter: "Rozdział 1", illustration: "🧊🌊", text: "Pewnego dnia obok przypłynęła wielka kra lodowa w kształcie statku. 'To moja szansa!' – pomyślał Franek i wskoczył na pokład. Kra ruszyła w nieznane..." },
+      { chapter: "Rozdział 2", illustration: "🌴🌺", text: "Po wielu dniach kra dopłynęła do ciepłych wód. Franek zobaczył palmowe wyspy, kolorowe ptaki i ciepłe morze. 'Tutaj wszystko jest takie inne!' – zachwycał się." },
+      { chapter: "Rozdział 2", illustration: "🐬🐠", text: "Delfin Delfek zabrał go pod wodę. Franek widział koralowce, ryby w tysiącu kolorów i zatopiony skarb! 'Świat jest taki wielki i piękny!' – myślał z uśmiechem." },
+      { chapter: "Powrót", illustration: "⭐🏠", text: "W końcu Franek wrócił na Biegun, ale teraz patrzył na swój dom inaczej. Wiedział, że każde miejsce ma swoje skarby. 'Dom jest najpiękniejszy, gdy się po nim stęskniłeś' – powiedział i objął swoją krę. Koniec! 🐻‍❄️💙" }
+    ]
+  },
+  {
+    id: 5,
+    title: "Rakieta Tomka",
+    emoji: "🚀",
+    color: "#F97316",
+    color2: "#EA580C",
+    category: "kosmos",
+    pages: [
+      { chapter: "Start!", illustration: "🚀⭐", text: "Tomek miał 7 lat i jedno wielkie marzenie – polecieć w kosmos! Co wieczór oglądał gwiazdy przez lunetę i rysował rakiety w zeszycie." },
+      { chapter: "Pomysł", illustration: "🔧📝", text: "Pewnego dnia Tomek postanowił zbudować rakietę! Zebrał pudełka po butach, rolki po papierze toaletowym, srebrną folię i... mnóstwo wyobraźni!" },
+      { chapter: "Budowanie", illustration: "🛸✨", text: "Po trzech dniach rakieta była gotowa. Była wysoka jak Tomek, błyszcząca i miała trzy silniki z rur kartonowych. 'Idealna!' – stwierdził budowniczy." },
+      { chapter: "Lot!", illustration: "🌙🪐", text: "Tomek wszedł do środka, nacisnął wyimaginowany przycisk i... w jego głowie rakieta wzbiła się w niebo! Leciał obok Księżyca, Saturna i kolorowych mgławic." },
+      { chapter: "Lądowanie", illustration: "🌟🎊", text: "Kiedy mama zawołała na kolację, Tomek wyszedł z rakiety z wielkim uśmiechem. 'Czy byłeś w kosmosie?' – spytała. 'Tak!' – odpowiedział. I miał rację. Wyobraźnia zawsze lata najwyżej! 🚀💫" }
+    ]
+  },
+  {
+    id: 6,
+    title: "Tajemnica Lasu",
+    emoji: "🌲",
+    color: "#84CC16",
+    color2: "#65A30D",
+    category: "przygody",
+    pages: [
+      { chapter: "Prolog", illustration: "🌲🌿", text: "Za wsią Marysi rozciągał się stary las. Dorośli mówili, że w środku kryje się wielka tajemnica. Oczywiście Marysia musiała ją odkryć!" },
+      { chapter: "Wejście", illustration: "🦊🍄", text: "Razem z liskiem Rudkiem weszła między drzewa. Las był pełen dźwięków – śpiewu ptaków, szumu liści i... czegoś tajemniczego. Bum, bum, bum. Coś biło rytmicznie." },
+      { chapter: "Odkrycie", illustration: "🎺🎵", text: "Za starym dębem znalazły źródło dźwięku: leśne skrzaty grały na gałązkach i kamieniach! To był ich codzienny koncert. Zobaczyły Marysię i... zaprosiły ją do środka!" },
+      { chapter: "Taniec", illustration: "💃🕺🎶", text: "Marysia tańczyła ze skrzatami do wieczora. Nauczyły ją trzepotać jak liść na wietrze i turlać się jak żołądź ze wzgórza. Nigdy w życiu tak się nie śmiała!" },
+      { chapter: "Sekret", illustration: "🤫⭐", text: "Wracając do domu, Marysia uśmiechała się pod nosem. Obiecała skrzatom zachować tajemnicę. Ale mama widziała jej oczy – pełne gwiazd i tańca. I tego nie da się ukryć. Koniec! 🌲✨" }
+    ]
+  }
+];
+
+// ===========================
+// STATE
+// ===========================
+let currentBookId = null;
+let currentPage = 0;
+let isDark = false;
+let isSpeaking = false;
+let speechSynth = window.speechSynthesis;
+let currentUtterance = null;
+let fontSize = 17;
+let readingProgress = {};
+let completedBooks = {};
+let currentCategory = 'all';
+let deferredPrompt = null;
+
+// ===========================
+// STORAGE
+// ===========================
+function saveState() {
+  try {
+    localStorage.setItem('kk_progress', JSON.stringify(readingProgress));
+    localStorage.setItem('kk_completed', JSON.stringify(completedBooks));
+    localStorage.setItem('kk_dark', isDark ? '1' : '0');
+    localStorage.setItem('kk_fontsize', fontSize);
+  } catch(e) {}
+}
+function loadState() {
+  try {
+    const p = localStorage.getItem('kk_progress');
+    if (p) readingProgress = JSON.parse(p);
+    const c = localStorage.getItem('kk_completed');
+    if (c) completedBooks = JSON.parse(c);
+    const d = localStorage.getItem('kk_dark');
+    if (d === '1') { isDark = true; document.body.classList.add('dark'); updateDarkBtn(); }
+    const f = localStorage.getItem('kk_fontsize');
+    if (f) fontSize = parseInt(f);
+  } catch(e) {}
+}
+
+// ===========================
+// SHELF RENDERING
+// ===========================
+function renderShelf(category = 'all') {
+  const scroll = document.getElementById('shelfScroll');
+  const allBooks = [...BOOKS, ...userBooks.filter(ub => !BOOKS.find(b => b.id === ub.id))];
+  const filtered = category === 'all' ? allBooks : allBooks.filter(b => b.category === category);
+  
+  // Group books into shelves of ~3-4
+  const perShelf = 3;
+  const shelves = [];
+  for (let i = 0; i < filtered.length; i += perShelf) {
+    shelves.push(filtered.slice(i, i + perShelf));
+  }
+
+  scroll.innerHTML = '';
+
+  if (shelves.length === 0) {
+    scroll.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2);font-size:18px;font-weight:700;">Brak książek w tej kategorii 📚</div>';
+    return;
+  }
+
+  shelves.forEach((row, ri) => {
+    const unit = document.createElement('div');
+    unit.className = 'shelf-unit';
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'shelf-row';
+    
+    row.forEach((book, bi) => {
+      const card = document.createElement('div');
+      card.className = 'book-card';
+      card.style.animationDelay = `${(ri * perShelf + bi) * 0.08}s`;
+      
+      const prog = readingProgress[book.id] || 0;
+      const progPct = Math.round((prog / (book.pages.length - 1)) * 100);
+      const done = completedBooks[book.id];
+      const stars = done ? (done >= book.pages.length - 1 ? '⭐⭐⭐' : '⭐⭐') : (prog > 0 ? '⭐' : '');
+
+      card.innerHTML = `
+        <div class="book-cover" style="background:linear-gradient(135deg,${book.color},${book.color2})">
+          <div class="book-emoji">${book.emoji}</div>
+          <div class="book-title-small">${book.title}</div>
+        </div>
+        <div class="book-stars">${stars}</div>
+        <div class="progress-bar-mini">
+          <div class="progress-fill-mini" style="width:${progPct}%"></div>
+        </div>
+      `;
+      card.onclick = () => openBook(book.id);
+      rowDiv.appendChild(card);
+    });
+
+    unit.appendChild(rowDiv);
+    scroll.appendChild(unit);
+  });
+}
+
+function filterBooks(cat, btn) {
+  currentCategory = cat;
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderShelf(cat);
+}
+
+// ===========================
+// BOOK READER
+// ===========================
+function openBook(bookId) {
+  currentBookId = bookId;
+  const book = BOOKS.find(b => b.id === bookId) || userBooks.find(b => b.id === bookId);
+  currentPage = readingProgress[bookId] || 0;
+
+  document.getElementById('readerTitle').textContent = `${book.emoji} ${book.title}`;
+  document.body.style.setProperty('--accent', book.color);
+
+  showScreen('reader-screen');
+  renderPage(currentPage);
+  showToast(`📖 Czytasz: ${book.title}`);
+}
+
+function renderPage(pageIdx, direction = 'none') {
+  const book = BOOKS.find(b => b.id === currentBookId) || userBooks.find(b => b.id === currentBookId);
+  const page = book.pages[pageIdx];
+  const container = document.getElementById('pageContainer');
+
+  if (direction !== 'none') {
+    // Animate page flip
+    const oldPage = document.getElementById('currentPage');
+    const newPage = document.createElement('div');
+    newPage.className = 'page';
+    newPage.id = 'newPage';
+    newPage.style.zIndex = 3;
+
+    newPage.innerHTML = buildPageHTML(page, pageIdx, book.pages.length);
+    container.appendChild(newPage);
+
+    const outClass = direction === 'next' ? 'flipping-out' : 'prev-flip-in';
+    const inClass = direction === 'next' ? 'flipping-in' : 'prev-flip-out';
+
+    // Set font size
+    const newTextEl = newPage.querySelector('.page-text') || newPage.querySelector('.epub-page-content');
+    if (newTextEl) newTextEl.style.fontSize = fontSize + 'px';
+
+    if (direction === 'next') {
+      oldPage.classList.add('flipping-out');
+      setTimeout(() => {
+        newPage.classList.add('flipping-in');
+        newPage.id = 'currentPage';
+        oldPage.remove();
+      }, 100);
+    } else {
+      newPage.style.transform = 'rotateY(-160deg)';
+      newPage.style.opacity = '0';
+      oldPage.classList.add('prev-flip-in');
+      setTimeout(() => {
+        newPage.classList.add('prev-flip-out');
+        newPage.id = 'currentPage';
+        newPage.style.transform = '';
+        newPage.style.opacity = '';
+        oldPage.remove();
+      }, 100);
+    }
+
+    setTimeout(() => {
+      newPage.classList.remove('flipping-in', 'prev-flip-out');
+    }, 700);
+
+  } else {
+    const pg = document.getElementById('currentPage');
+    pg.innerHTML = buildPageHTML(page, pageIdx, book.pages.length);
+    const pgTextEl = pg.querySelector('.page-text') || pg.querySelector('.epub-page-content');
+    if (pgTextEl) pgTextEl.style.fontSize = fontSize + 'px';
+  }
+
+  updateControls(pageIdx, book.pages.length);
+  
+  // Save progress
+  readingProgress[currentBookId] = pageIdx;
+  saveState();
+}
+
+function buildPageHTML(page, idx, total) {
+  if (page.isEpub) {
+    return `
+      <div class="page-chapter">${page.chapter}</div>
+      <div class="epub-page-content">${page.text}</div>
+      <div class="page-num">— ${idx + 1} / ${total} —</div>
+    `;
+  }
+  return `
+    <div class="page-chapter">${page.chapter}</div>
+    <div class="page-illustration">${page.illustration}</div>
+    <div class="page-text">${page.text}</div>
+    <div class="page-num">— ${idx + 1} / ${total} —</div>
+  `;
+}
+
+function updateControls(idx, total) {
+  document.getElementById('prevBtn').disabled = idx === 0;
+  document.getElementById('nextBtn').disabled = idx === total - 1;
+  document.getElementById('progressText').textContent = `Strona ${idx + 1} z ${total}`;
+  const pct = total > 1 ? (idx / (total - 1)) * 100 : 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  // Swipe hints
+  document.getElementById('leftHint').style.opacity = idx > 0 ? '0.4' : '0';
+  document.getElementById('rightHint').style.opacity = idx < total - 1 ? '0.4' : '0';
+}
+
+function nextPage() {
+  const book = BOOKS.find(b => b.id === currentBookId) || userBooks.find(b => b.id === currentBookId);
+  if (currentPage < book.pages.length - 1) {
+    stopTTS();
+    currentPage++;
+    renderPage(currentPage, 'next');
+    if (currentPage === book.pages.length - 1) {
+      setTimeout(showCompletion, 800);
+    }
+  }
+}
+
+function prevPage() {
+  if (currentPage > 0) {
+    stopTTS();
+    currentPage--;
+    renderPage(currentPage, 'prev');
+  }
+}
+
+// ===========================
+// SWIPE SUPPORT
+// ===========================
+let touchStartX = 0, touchStartY = 0;
+document.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchend', e => {
+  if (!document.getElementById('reader-screen').classList.contains('active')) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+    if (dx < 0) nextPage();
+    else prevPage();
+  }
+}, { passive: true });
+
+// ===========================
+// COMPLETION
+// ===========================
+function showCompletion() {
+  const book = BOOKS.find(b => b.id === currentBookId);
+  completedBooks[currentBookId] = (completedBooks[currentBookId] || 0) + 1;
+  saveState();
+
+  const times = completedBooks[currentBookId];
+  const stars = times >= 3 ? '⭐⭐⭐' : times >= 2 ? '⭐⭐' : '⭐';
+
+  document.getElementById('completionEmoji').textContent = book.emoji;
+  document.getElementById('completionText').textContent = `Skończyłeś "${book.title}"!`;
+  document.getElementById('completionStars').textContent = stars;
+  document.getElementById('completionOverlay').classList.add('show');
+
+  fireStars();
+}
+
+function fireStars() {
+  const rain = document.getElementById('starsRain');
+  rain.innerHTML = '';
+  const emojis = ['⭐', '🌟', '✨', '🎉', '🎊', '💫', '🌈'];
+  for (let i = 0; i < 30; i++) {
+    const s = document.createElement('div');
+    s.className = 'star-particle';
+    s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    s.style.left = Math.random() * 100 + 'vw';
+    s.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    s.style.animationDelay = Math.random() * 1.5 + 's';
+    s.style.fontSize = (16 + Math.random() * 24) + 'px';
+    rain.appendChild(s);
+  }
+}
+
+function closeCompletion() {
+  document.getElementById('completionOverlay').classList.remove('show');
+  goToShelf();
+}
+
+// ===========================
+// TTS
+// ===========================
+function toggleTTS() {
+  if (isSpeaking) { stopTTS(); return; }
+  const textEl = document.getElementById('currentPage')?.querySelector('.page-text') || document.getElementById('currentPage')?.querySelector('.epub-page-content');
+  if (!textEl) return;
+  
+  const text = textEl.textContent;
+  currentUtterance = new SpeechSynthesisUtterance(text);
+  currentUtterance.lang = 'pl-PL';
+  currentUtterance.rate = 0.85;
+  currentUtterance.pitch = 1.2;
+
+  // Try to find a Polish voice
+  const voices = speechSynth.getVoices();
+  const plVoice = voices.find(v => v.lang.startsWith('pl')) || voices.find(v => v.lang.startsWith('en'));
+  if (plVoice) currentUtterance.voice = plVoice;
+
+  currentUtterance.onend = () => {
+    isSpeaking = false;
+    document.getElementById('ttsBtn').classList.remove('speaking');
+    document.getElementById('ttsBtn').textContent = '🔊';
+  };
+
+  speechSynth.speak(currentUtterance);
+  isSpeaking = true;
+  document.getElementById('ttsBtn').classList.add('speaking');
+  document.getElementById('ttsBtn').textContent = '🔇';
+}
+
+function stopTTS() {
+  speechSynth.cancel();
+  isSpeaking = false;
+  const btn = document.getElementById('ttsBtn');
+  if (btn) { btn.classList.remove('speaking'); btn.textContent = '🔊'; }
+}
+
+// ===========================
+// DARK MODE
+// ===========================
+function toggleDark() {
+  isDark = !isDark;
+  document.body.classList.toggle('dark', isDark);
+  updateDarkBtn();
+  saveState();
+  showToast(isDark ? '🌙 Tryb nocny włączony' : '☀️ Tryb dzienny włączony');
+}
+
+function updateDarkBtn() {
+  const icon = isDark ? '☀️' : '🌙';
+  const btn1 = document.getElementById('darkBtn');
+  const btn2 = document.getElementById('darkBtn2');
+  if (btn1) btn1.textContent = icon;
+  if (btn2) btn2.textContent = icon;
+}
+
+// ===========================
+// FONT SIZE
+// ===========================
+function changeFontSize(delta) {
+  fontSize = Math.max(12, Math.min(28, fontSize + delta));
+  const textEl = document.getElementById('currentPage')?.querySelector('.page-text') || document.getElementById('currentPage')?.querySelector('.epub-page-content');
+  if (textEl) textEl.style.fontSize = fontSize + 'px';
+  saveState();
+}
+
+// ===========================
+// NAVIGATION
+// ===========================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goToShelf() {
+  stopTTS();
+  // Reset accent color
+  document.body.style.removeProperty('--accent');
+  showScreen('shelf-screen');
+  renderShelf(currentCategory);
+}
+
+// ===========================
+// TOAST
+// ===========================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===========================
+// PWA INSTALL
+// ===========================
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(() => {
+    document.getElementById('installBanner').classList.add('show');
+  }, 3000);
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; hideBanner(); });
+  } else {
+    showToast('📱 Dodaj stronę do ekranu głównego w przeglądarce!');
+    hideBanner();
+  }
+}
+
+function hideBanner() {
+  document.getElementById('installBanner').classList.remove('show');
+}
+
+// ===========================
+// SERVICE WORKER (PWA)
+// ===========================
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'kk-v1';
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', './index.html'])));
+    });
+    self.addEventListener('fetch', e => {
+      e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).catch(() => new Response('Offline'))));
+    });
+  `;
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
+}
+
+// ===========================
+// WEB MANIFEST
+// ===========================
+const manifest = {
+  name: "KinderKsiążka",
+  short_name: "KinderKsiążka",
+  description: "Magiczna biblioteczka dla dzieci",
+  start_url: "./",
+  display: "standalone",
+  background_color: "#FFF8F0",
+  theme_color: "#FF6B6B",
+  icons: [
+    { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>", sizes: "192x192", type: "image/svg+xml" },
+    { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>", sizes: "512x512", type: "image/svg+xml" }
+  ]
+};
+const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+const manifestUrl = URL.createObjectURL(manifestBlob);
+const manifestLink = document.createElement('link');
+manifestLink.rel = 'manifest';
+manifestLink.href = manifestUrl;
+document.head.appendChild(manifestLink);
+
+// ===========================
+// KEYBOARD NAVIGATION
+// ===========================
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('reader-screen').classList.contains('active')) return;
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextPage(); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); prevPage(); }
+  if (e.key === 'Escape') goToShelf();
+});
+
+// ===========================
+// INIT
+// ===========================
+window.addEventListener('load', () => {
+  loadUserBooks();
+  loadState();
+  setTimeout(() => {
+    document.getElementById('loading').style.display = 'none';
+    showScreen('shelf-screen');
+    renderShelf('all');
+  }, 1800);
+});
+
+// ===========================
+// EPUB SUPPORT
+// ===========================
+let userBooks = []; // Custom EPUB books stored in memory + localStorage (metadata only)
+
+const BOOK_COLORS = [
+  ['#FF6B6B','#CC4444'], ['#A855F7','#7C3AED'], ['#22C55E','#16A34A'],
+  ['#38BDF8','#0284C7'], ['#F97316','#EA580C'], ['#84CC16','#65A30D'],
+  ['#F43F5E','#BE123C'], ['#0EA5E9','#0369A1'], ['#8B5CF6','#6D28D9'],
+  ['#F59E0B','#D97706']
+];
+const BOOK_EMOJIS = ['📖','📕','📗','📘','📙','📚','🔖','✏️','🖊️','📝'];
+
+function openEpubUpload() {
+  document.getElementById('epubModal').classList.add('show');
+  renderEpubBookList();
+}
+
+function closeEpubUpload() {
+  document.getElementById('epubModal').classList.remove('show');
+}
+
+// Drag and drop support
+(function setupDrop() {
+  const drop = document.getElementById('epubDropZone');
+  if (!drop) return;
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+  drop.addEventListener('drop', e => {
+    e.preventDefault();
+    drop.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.name.endsWith('.epub')) handleEpubFile(file);
+    else showToast('⚠️ Proszę wybrać plik .epub');
+  });
+})();
+
+async function handleEpubFile(file) {
+  if (!file || !file.name.endsWith('.epub')) {
+    showToast('⚠️ Proszę wybrać plik .epub');
+    return;
+  }
+
+  const progressWrap = document.getElementById('epubProgress');
+  const progressFill = document.getElementById('epubProgressFill');
+  const progressText = document.getElementById('epubProgressText');
+
+  progressWrap.style.display = 'block';
+  progressFill.style.width = '10%';
+  progressText.textContent = 'Wczytywanie pliku...';
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    progressFill.style.width = '30%';
+    progressText.textContent = 'Rozpakowywanie EPUB...';
+
+    // Use JSZip to unzip the epub
+    const zip = await loadJSZip();
+    const zipData = await zip.loadAsync(arrayBuffer);
+    progressFill.style.width = '50%';
+    progressText.textContent = 'Czytanie metadanych...';
+
+    // Parse OPF for metadata
+    const opfInfo = await parseOpf(zipData);
+    progressFill.style.width = '70%';
+    progressText.textContent = 'Przetwarzanie rozdziałów...';
+
+    // Extract text chapters
+    const chapters = await extractChapters(zipData, opfInfo);
+    progressFill.style.width = '90%';
+    progressText.textContent = 'Zapisywanie...';
+
+    // Build book pages (split chapters into readable pages)
+    const pages = buildEpubPages(chapters);
+
+    const colorPair = BOOK_COLORS[userBooks.length % BOOK_COLORS.length];
+    const emoji = BOOK_EMOJIS[userBooks.length % BOOK_EMOJIS.length];
+    const bookId = 'epub_' + Date.now();
+
+    const book = {
+      id: bookId,
+      title: opfInfo.title || file.name.replace('.epub',''),
+      author: opfInfo.author || '',
+      emoji: emoji,
+      color: colorPair[0],
+      color2: colorPair[1],
+      category: 'moje',
+      isEpub: true,
+      pages: pages
+    };
+
+    userBooks.push(book);
+    saveUserBooks();
+    progressFill.style.width = '100%';
+    progressText.textContent = 'Gotowe! ✅';
+
+    setTimeout(() => {
+      progressWrap.style.display = 'none';
+      progressFill.style.width = '0%';
+      document.getElementById('epubFileInput').value = '';
+      renderEpubBookList();
+      showToast('📚 Dodano: ' + book.title);
+    }, 800);
+
+  } catch(err) {
+    console.error(err);
+    progressWrap.style.display = 'none';
+    showToast('❌ Błąd wczytywania EPUB: ' + err.message);
+  }
+}
+
+// Lazy-load JSZip from CDN
+let _jszip = null;
+function loadJSZip() {
+  if (_jszip) return Promise.resolve(_jszip);
+  return new Promise((resolve, reject) => {
+    if (window.JSZip) { _jszip = new window.JSZip(); resolve(_jszip); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    s.onload = () => { _jszip = new window.JSZip(); resolve(_jszip); };
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function parseOpf(zip) {
+  // Find container.xml -> find OPF file
+  let opfPath = null;
+  const containerFile = zip.file('META-INF/container.xml');
+  if (containerFile) {
+    const containerXml = await containerFile.async('text');
+    const match = containerXml.match(/full-path="([^"]+\.opf)"/i);
+    if (match) opfPath = match[1];
+  }
+  if (!opfPath) {
+    // Fallback: search for any .opf
+    const opfFile = Object.keys(zip.files).find(f => f.endsWith('.opf'));
+    opfPath = opfFile || null;
+  }
+
+  let title = '', author = '', spine = [], manifest = {};
+  if (opfPath) {
+    const opfFile = zip.file(opfPath);
+    if (opfFile) {
+      const opfXml = await opfFile.async('text');
+      const titleMatch = opfXml.match(/<dc:title[^>]*>([^<]+)<\/dc:title>/i);
+      if (titleMatch) title = titleMatch[1].trim();
+      const authorMatch = opfXml.match(/<dc:creator[^>]*>([^<]+)<\/dc:creator>/i);
+      if (authorMatch) author = authorMatch[1].trim();
+
+      // Parse manifest items
+      const manifestMatches = [...opfXml.matchAll(/<item[^>]+id="([^"]+)"[^>]+href="([^"]+)"[^>]*media-type="([^"]+)"[^>]*/gi)];
+      manifestMatches.forEach(m => { manifest[m[1]] = { href: m[2], type: m[3] }; });
+
+      // Parse spine
+      const spineMatches = [...opfXml.matchAll(/<itemref[^>]+idref="([^"]+)"/gi)];
+      spine = spineMatches.map(m => m[1]).filter(id => manifest[id]);
+    }
+    return { title, author, spine, manifest, opfDir: opfPath.replace(/[^/]+$/, '') };
+  }
+  return { title, author, spine: [], manifest: {}, opfDir: '' };
+}
+
+async function extractChapters(zip, opfInfo) {
+  const { spine, manifest, opfDir } = opfInfo;
+  const chapters = [];
+
+  // Prefer spine order; fallback to all HTML files
+  let htmlFiles = [];
+  if (spine.length > 0) {
+    htmlFiles = spine.map(id => opfDir + manifest[id].href);
+  } else {
+    htmlFiles = Object.keys(zip.files).filter(f => f.match(/\.(html|xhtml|htm)$/i) && !f.includes('toc'));
+  }
+
+  for (const filePath of htmlFiles) {
+    const file = zip.file(filePath) || zip.file(filePath.replace(/^\//, ''));
+    if (!file) continue;
+    let html = await file.async('text');
+    // Strip tags, decode entities
+    let text = html
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+    if (text.length > 50) chapters.push(text);
+  }
+
+  // Fallback if nothing found
+  if (chapters.length === 0) {
+    const allHtml = Object.keys(zip.files).filter(f => f.match(/\.(html|xhtml|htm)$/i));
+    for (const fp of allHtml.slice(0, 20)) {
+      const file = zip.file(fp);
+      if (!file) continue;
+      let html = await file.async('text');
+      let text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (text.length > 50) chapters.push(text);
+    }
+  }
+
+  return chapters;
+}
+
+function buildEpubPages(chapters) {
+  const WORDS_PER_PAGE = 120;
+  const pages = [];
+
+  chapters.forEach((chapterText, ci) => {
+    const words = chapterText.split(/\s+/).filter(Boolean);
+    let i = 0;
+    let chapterPage = 1;
+    while (i < words.length) {
+      const chunk = words.slice(i, i + WORDS_PER_PAGE).join(' ');
+      pages.push({
+        chapter: `Rozdział ${ci + 1}`,
+        illustration: '',
+        text: chunk,
+        isEpub: true
+      });
+      i += WORDS_PER_PAGE;
+      chapterPage++;
+    }
+  });
+
+  // Limit to 500 pages max for performance
+  return pages.slice(0, 500);
+}
+
+// ===========================
+// EPUB BOOK LIST UI
+// ===========================
+function renderEpubBookList() {
+  const list = document.getElementById('epubBookList');
+  if (userBooks.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text2);font-size:14px;font-weight:600;">Brak dodanych książek</div>';
+    return;
+  }
+  list.innerHTML = userBooks.map((book, i) => `
+    <div class="epub-book-item">
+      <div class="epub-book-cover-mini" style="background:linear-gradient(135deg,${book.color},${book.color2})">${book.emoji}</div>
+      <div class="epub-book-info">
+        <div class="epub-book-name">${book.title}</div>
+        <div class="epub-book-meta">${book.author ? book.author + ' · ' : ''}${book.pages.length} stron</div>
+      </div>
+      <div class="epub-book-actions">
+        <button class="epub-read-btn" onclick="openEpubBook('${book.id}')">📖 Czytaj</button>
+        <button class="epub-delete-btn" onclick="deleteUserBook('${book.id}')" title="Usuń">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openEpubBook(bookId) {
+  closeEpubUpload();
+  openBook(bookId);
+}
+
+function deleteUserBook(bookId) {
+  userBooks = userBooks.filter(b => b.id !== bookId);
+  delete readingProgress[bookId];
+  delete completedBooks[bookId];
+  saveUserBooks();
+  saveState();
+  renderEpubBookList();
+  renderShelf(currentCategory);
+  showToast('🗑️ Usunięto książkę');
+}
+
+// ===========================
+// EPUB PERSISTENCE
+// ===========================
+function saveUserBooks() {
+  try {
+    // Save only metadata + pages (no binary data)
+    localStorage.setItem('kk_userbooks', JSON.stringify(userBooks));
+  } catch(e) {
+    // If storage quota exceeded, save just metadata without full pages
+    try {
+      const light = userBooks.map(b => ({...b, pages: b.pages.slice(0,10)}));
+      localStorage.setItem('kk_userbooks', JSON.stringify(light));
+    } catch(e2) {}
+  }
+}
+
+function loadUserBooks() {
+  try {
+    const raw = localStorage.getItem('kk_userbooks');
+    if (raw) userBooks = JSON.parse(raw);
+  } catch(e) {}
+}
+
+
+
+</script>
+</body>
+</html>
